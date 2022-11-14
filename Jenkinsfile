@@ -1,5 +1,8 @@
 pipeline{
     agent any
+    environment {
+        VERSION = "${env.BUILD_ID}"
+    }
     stages{
         stage("Sonar Quality Check"){
             steps{
@@ -18,5 +21,18 @@ pipeline{
                 }
             }
         }
+        stage("Docker Build & Docker Push"){
+            steps{
+                script{
+                    sh '''
+                    docker build -t 10.0.8.74:8083/springapp:${VERSION} .
+                    docker login -u admin -p admin123 10.0.8.74:8083
+                    docker push 10.0.8.74:8083/springapp:${VERSION}
+                    docker rmi 10.0.8.74:8083/springapp:${VERSION}
+                    '''
+                }
+            }
+        }
+
     }
 }
